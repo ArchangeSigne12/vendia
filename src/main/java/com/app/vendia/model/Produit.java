@@ -7,8 +7,10 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "produit")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter 
+@Setter
+@NoArgsConstructor 
+@AllArgsConstructor
 @Builder
 public class Produit {
 
@@ -39,8 +41,6 @@ public class Produit {
 
     private String image;
 
-    // Verrouillage optimiste : empêche la survente en cas d'accès concurrent
-    // sur la décrémentation du stock (voir PaiementService).
     @Version
     private Long version;
 }

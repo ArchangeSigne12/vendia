@@ -3,14 +3,14 @@ spring:
     name: vendia
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:vendia}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5434}/${DB_NAME:vendia}
     username: ${DB_USER:vendia}
     password: ${DB_PASSWORD:vendia}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: validate   # le schéma est piloté par Flyway, jamais par Hibernate
+      ddl-auto: validate   
     open-in-view: false
     properties:
       hibernate:
@@ -32,8 +32,8 @@ springdoc:
 vendia:
   jwt:
     secret: ${JWT_SECRET:changez-cette-valeur-en-production-avec-une-cle-longue-et-aleatoire}
-    access-token-expiration-ms: ${JWT_ACCESS_EXP_MS:900000}      # 15 minutes
-    refresh-token-expiration-ms: ${JWT_REFRESH_EXP_MS:604800000} # 7 jours
+    access-token-expiration-ms: ${JWT_ACCESS_EXP_MS:900000}      
+    refresh-token-expiration-ms: ${JWT_REFRESH_EXP_MS:604800000} 
   stripe:
     secret-key: ${STRIPE_SECRET_KEY:sk_test_placeholder}
 
