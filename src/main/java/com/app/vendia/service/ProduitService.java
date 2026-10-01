@@ -13,6 +13,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.app.vendia.dto.request.AjusterStockRequest;
+import com.app.vendia.exception.AjustementStockInvalideException;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProduitService {
@@ -74,6 +79,22 @@ public class ProduitService {
     public void desactiver(Long id) {
         Produit produit = trouver(id);
         produit.setActif(false);
+    }
+
+    @Transactional
+    public ProduitResponse ajusterStock(Long id, AjusterStockRequest requete) {
+    Produit produit = trouver(id); 
+
+    int nouveauStock = produit.getStock() + requete.delta();
+    if (nouveauStock < 0) {
+        throw new AjustementStockInvalideException(produit.getNom(), produit.getStock(), requete.delta());
+    }
+
+    log.info("Ajustement stock produit {} : {} -> {} (delta {}, motif : {})",
+            produit.getId(), produit.getStock(), nouveauStock, requete.delta(), requete.motif());
+
+    produit.setStock(nouveauStock);
+    return versDto(produit);
     }
 
     private Produit trouver(Long id) {

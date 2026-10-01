@@ -18,4 +18,6 @@ public interface ProduitRepository extends JpaRepository<Produit, Long> {
                   or lower(p.description) like lower(concat('%', :q, '%')))
            """)
     Page<Produit> rechercher(@Param("q") String motCle, Pageable pageable);
+
+    long countByStockAndActifTrue(int i);
 }

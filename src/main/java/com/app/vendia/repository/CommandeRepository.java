@@ -1,6 +1,7 @@
 package com.app.vendia.repository;
 
 import com.app.vendia.model.Commande;
+import com.app.vendia.model.StatutCommande;
 
 import java.util.Optional;
 
@@ -14,5 +15,7 @@ public interface CommandeRepository extends JpaRepository<Commande, Long> {
 
     Optional<Commande> findByIdAndClientId(Long id, Long clientId);
 
-    Optional<Commande> findByIdAndClientId(long id, long clientId);
+    Page<Commande> findByStatut(StatutCommande statut, Pageable pageable);
+
+    long countByStatut(StatutCommande statut);
 }

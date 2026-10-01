@@ -1,5 +1,6 @@
 package com.app.vendia.controller;
 
+import com.app.vendia.dto.request.AjusterStockRequest;
 import com.app.vendia.dto.request.ProduitRequest;
 import com.app.vendia.dto.response.ProduitResponse;
 import com.app.vendia.service.ProduitService;
@@ -54,5 +55,13 @@ public class ProduitController {
     public ResponseEntity<Void> desactiver(@PathVariable Long id) {
         produitService.desactiver(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/admin/{id}/stock")
+    public ProduitResponse ajusterStock(
+            @PathVariable Long id,
+            @Valid @RequestBody AjusterStockRequest requete) 
+    {
+    return produitService.ajusterStock(id,requete );
     }
 }
