@@ -1,12 +1,14 @@
 package com.app.vendia.service;
 
 import com.app.vendia.model.Client;
+import com.app.vendia.model.RefreshTokenRevoque;
 import com.app.vendia.model.Role;
 import com.app.vendia.dto.request.*;
 import com.app.vendia.dto.response.*;
 import com.app.vendia.exception.EmailDejaUtiliseException;
 import com.app.vendia.exception.IdentifiantsInvalidesException;
 import com.app.vendia.repository.ClientRepository;
+import com.app.vendia.repository.RefreshTokenRevoqueRepository;
 import com.app.vendia.security.JwtService;
 import com.app.vendia.security.VendiaUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -25,6 +32,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RefreshTokenRevoqueRepository refreshTokenRevoqueRepository;
 
     @Transactional
     public AuthResponse inscrire(RegisterRequest requete) {
@@ -70,6 +78,11 @@ public class AuthService {
     }
 
     public AuthResponse rafraichir(RefreshRequest requete) {
+        // Un refresh token déconnecté (logout) ne doit plus pouvoir être utilisé.
+        if (refreshTokenRevoqueRepository.existsById(empreinte(requete.refreshToken()))) {
+            throw new IdentifiantsInvalidesException();
+        }
+
         String email = jwtService.extraireEmail(requete.refreshToken());
         Client client = clientRepository.findByEmail(email)
                 .orElseThrow(IdentifiantsInvalidesException::new);
@@ -84,5 +97,24 @@ public class AuthService {
                 jwtService.genererAccessToken(userDetails),
                 requete.refreshToken()
         );
+    }
+
+    @Transactional
+    public void deconnecter(RefreshRequest requete) {
+        String hash = empreinte(requete.refreshToken());
+        if (!refreshTokenRevoqueRepository.existsById(hash)) {
+            refreshTokenRevoqueRepository.save(new RefreshTokenRevoque(hash));
+        }
+    }
+
+    /** Empreinte SHA-256 du token : on ne stocke jamais le token lui-même. */
+    private String empreinte(String token) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(token.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

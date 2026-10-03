@@ -28,7 +28,8 @@ class AdminCommandeServiceTest {
     @Test
     void changerStatut_doitRestituerLeStockQuandUneCommandePayeeEstAnnulee() {
         Produit produit = Produit.builder().id(10L).nom("Clavier").stock(3).build();
-        Commande commande = Commande.builder().id(1L).statut(StatutCommande.PAYEE).build();
+        Client client = Client.builder().id(1L).build();
+        Commande commande = Commande.builder().id(1L).statut(StatutCommande.PAYEE).client(client).build();
         commande.getLignes().add(LigneCommande.builder()
                 .id(new LigneCommandeId(10L, 1L)).commande(commande).produit(produit)
                 .quantite(2).prix(new BigDecimal("59.90")).build());
@@ -38,7 +39,7 @@ class AdminCommandeServiceTest {
 
         adminCommandeService.changerStatut(1L, StatutCommande.ANNULEE);
 
-        assertThat(produit.getStock()).isEqualTo(5); // 3 + 2 restitués
+        assertThat(produit.getStock()).isEqualTo(5); 
         assertThat(commande.getStatut()).isEqualTo(StatutCommande.ANNULEE);
     }
 
